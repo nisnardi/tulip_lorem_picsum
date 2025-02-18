@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { View, Alert } from "react-native";
+import { useContext, useEffect, useState } from "react";
+import { View, Alert, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Notifications from "expo-notifications";
 import { fetchPicsumImageList } from "@/utils/fetch";
@@ -11,6 +11,10 @@ import {
   sendLocalNotification,
   setNotificationHandler,
 } from "@/utils/notifications";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { COLORS } from "@/constants/colors";
+import { Link, useLocalSearchParams } from "expo-router";
+import { PhotosContext } from "@/context/photosContext";
 
 const NOTIFICATION_PERMISSION_ERROR =
   "Notification Permission Required.\n Please enable notifications in Settings.";
@@ -20,9 +24,16 @@ setNotificationHandler();
 export default function Index() {
   const [permissionStatus, setPermissionStatus] =
     useState<Notifications.PermissionStatus | null>(null);
-  const [images, setImages] = useState<PicsumPhoto[]>([]);
+  const context = useContext(PhotosContext);
   const [isLoading, setIsLoading] = useState(true);
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams();
+
+  if (!context) {
+    throw new Error("Gallery must be used within a PhotosProvider");
+  }
+
+  const { images, setImages } = context;
 
   useEffect(() => {
     async function checkNotificationsPermissionStatus() {
@@ -37,8 +48,10 @@ export default function Index() {
     async function fetchImageList() {
       try {
         setIsLoading(true);
-        const imageList = await fetchPicsumImageList();
-        setImages(imageList);
+        if (!Boolean(params.newphoto)) {
+          const imageList = await fetchPicsumImageList();
+          setImages(imageList);
+        }
       } catch (error) {
         console.log(error);
       } finally {
@@ -64,6 +77,19 @@ export default function Index() {
   return (
     <View style={{ flex: 1, paddingBottom: insets.bottom }}>
       <PhotoList photos={images} onPhotoPress={onPhotoPressHandler} />
+      <View style={styles.buttonContainer}>
+        <Link href="/photo">
+          <Ionicons name="add" size={32} color={COLORS.primary} />
+        </Link>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  buttonContainer: {
+    alignItems: "flex-end",
+    paddingBottom: 10,
+    paddingRight: 10,
+  },
+});
