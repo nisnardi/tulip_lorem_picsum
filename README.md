@@ -8,6 +8,15 @@
 npm install
 ```
 
+### Add local env variables
+
+- Creare `.env.local` file at the root directory
+- Add the following config:
+
+```js
+EXPO_PUBLIC_PICSUM_API_URL=https://picsum.photos/
+```
+
 ## Start the app
 
 ```bash
