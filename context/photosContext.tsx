@@ -11,8 +11,6 @@ export const PhotosContext = createContext<PhotoContextProps | null>(null);
 export const PhotosProvider = ({ children }: PropsWithChildren) => {
   const [images, setImages] = useState<PicsumPhoto[]>([]);
 
-  // console.log("Context images:", images);
-
   return (
     <PhotosContext.Provider value={{ images, setImages }}>
       {children}
